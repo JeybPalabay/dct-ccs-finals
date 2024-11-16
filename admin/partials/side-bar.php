@@ -19,7 +19,7 @@ require_once '../functions.php';
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-2" href="#">
+                    <a class="nav-link d-flex align-items-center gap-2" href="./partials/subjects/add.php">
                         <i class="fa-solid fa-book fa-fw me-2"></i>
                         Subjects
                     </a>
