@@ -1,3 +1,19 @@
+<?php
+include 'functions.php';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+
+    if (loginUser($email, $password)) {
+        header("Location: ../admin/dashboard.php");
+        exit();
+    } else {
+        $error_message = "Invalid email or password. Please try again.";
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
