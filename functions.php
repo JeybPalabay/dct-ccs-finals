@@ -46,4 +46,34 @@ function logoutUser() {
     exit();
 }
 
+function displayErrors(array $errors): string {
+    if (!$errors) {
+        return '';
+    }
+
+    $html = '<div class="alert alert-danger alert-dismissible fade show" role="alert">';
+    $html .= '<strong>System Errors</strong><ul class="mb-0">';
+
+    foreach ($errors as $error) {
+        $html .= sprintf('<li>%s</li>', htmlspecialchars($error));
+    }
+
+    $html .= '</ul>';
+    $html .= '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+    $html .= '</div>';
+
+    return $html;
+}
+
+function renderErrorsToView(string $error): string {
+    if (!$error) {
+        return '';
+    }
+
+    return sprintf(
+        '<div class="alert alert-danger alert-dismissible fade show" role="alert">%s<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>',
+        htmlspecialchars($error)
+    );
+}
+
 ?>
