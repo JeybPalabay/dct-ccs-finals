@@ -1,15 +1,33 @@
 <?php
 include 'functions.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
-    $email = $_POST['email'];
-    $password = $_POST['password'];
+// Initialize an empty error array
+$errors = [];
 
-    if (loginUser($email, $password)) {
-        header("Location: ../admin/dashboard.php");
-        exit();
-    } else {
-        $error_message = "Invalid email or password. Please try again.";
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
+        // Get the form values
+        $email = trim($_POST['email']);
+        $password = trim($_POST['password']);
+
+        // Validate email and password fields
+        if (empty($email)) {
+            $errors[] = "Email is required.";
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = "Invalid email.";
+        }
+
+        if (empty($password)) {
+            $errors[] = "Password is required.";
+        }
+
+        // If there are no validation errors, proceed to check credentials
+        if (empty($errors)) {
+        if (loginUser($email, $password)) {
+            header("Location: ../admin/dashboard.php");
+            exit();
+        } else {
+            $errors[] = "Invalid email or password.";
+        }
     }
 }
 ?>
@@ -28,6 +46,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     <div class="d-flex align-items-center justify-content-center vh-100">
         <div class="col-3">
             <!-- Server-Side Validation Messages should be placed here -->
+            <?php if (!empty($errors)): ?>
+                <div class="alert alert-danger alert-dismissible w-100" role="alert">
+                    <strong>System Errors</strong>
+                    <ul class="mb-0">
+                        <?php foreach ($errors as $error): ?>
+                            <li><?php echo htmlspecialchars($error); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"  style="font-size: 0.8rem;"></button>
+                </div>
+            <?php endif; ?>
+
+            
             <div class="card">
                 <div class="card-body">
                     <h1 class="h3 mb-4 fw-normal">Login</h1>
@@ -52,3 +83,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
 </body>
 
 </html>
+
+<?php include 'footer.php'; ?>
