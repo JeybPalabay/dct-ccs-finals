@@ -1,3 +1,3 @@
 <?php
-    // Logout Code Here
+   logoutUser();
 ?>

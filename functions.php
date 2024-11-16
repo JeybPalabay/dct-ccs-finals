@@ -39,4 +39,11 @@ function isUserLoggedIn() {
     return isset($_SESSION['user_id']);
 }
 
+function logoutUser() {
+    session_unset();
+    session_destroy();
+    header("Location: index.php");
+    exit();
+}
+
 ?>
