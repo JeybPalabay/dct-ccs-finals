@@ -1,6 +1,7 @@
 <?php
 require_once 'header.php';
-require_once '../functions.php';
+require_once __DIR__ . '/../../functions.php';
+
 
 ?>
 
@@ -19,7 +20,7 @@ require_once '../functions.php';
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-2" href="./partials/subjects/add.php">
+                    <a class="nav-link d-flex align-items-center gap-2" href="/admin/subjects/add.php">
                         <i class="fa-solid fa-book fa-fw me-2"></i>
                         Subjects
                     </a>
