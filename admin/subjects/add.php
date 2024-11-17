@@ -3,8 +3,50 @@
 require_once '../partials/header.php'; // Adjust path if needed
 require_once '../../functions.php';
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start(); // Start the session if it hasn't started
+}
 
+guard(); // Ensure user is logged in
 
+$errors = []; // Initialize an empty array for errors
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['close_errors'])) {
+    // Clear the errors array when the close button is pressed
+    $errors = [];
+    // Redirect to prevent form resubmission issues
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
+// Check if the form is submitted
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Get form data
+    $subject_data = [
+        'subject_code' => isset($_POST['subject_code']) ? $_POST['subject_code'] : '',
+        'subject_name' => isset($_POST['subject_name']) ? $_POST['subject_name'] : ''
+    ];
+
+    // Validate subject data (simple validation example)
+    if (empty($subject_data['subject_code'])) {
+        $errors[] = "Subject code is required.";
+    }
+    if (empty($subject_data['subject_name'])) {
+        $errors[] = "Subject name is required.";
+    }
+
+    // If there are no errors, store the subject in the session
+    if (empty($errors)) {
+        if (!isset($_SESSION['subjects'])) {
+            $_SESSION['subjects'] = []; // Initialize the subjects array in the session if not set
+        }
+
+        // Add the subject to the session
+        $_SESSION['subjects'][] = $subject_data;
+
+        // Clear the form fields after successful submission
+        $subject_data = []; // Reset form fields after successful submission
+    }
+}
 ?>
 
 <div class="container-fluid">
@@ -29,6 +71,21 @@ require_once '../../functions.php';
                     </nav>
                 </div>
             </div>
+
+            <?php if (!empty($errors)): ?>
+                <div class="alert alert-danger position-relative" style="width: 100%; margin-bottom: 15px;">
+                    <strong>System Errors</strong>
+                    <ul>
+                        <?php foreach ($errors as $error): ?>
+                            <li><?php echo htmlspecialchars($error); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <!-- Exit Button to close the error alert -->
+                    <form method="POST" action="" class="position-absolute top-0 end-0">
+                        <button type="submit" name="close_errors" class="btn-close btn-sm" aria-label="Close" style="color: red; font-size: 0.8rem; margin-right: 10px; margin-top: 10px;"></button>
+                    </form>
+                </div>
+            <?php endif; ?>
 
             <!-- Subject Form Card -->
             <div class="card mb-4">
