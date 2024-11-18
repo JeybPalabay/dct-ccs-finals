@@ -34,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $errors[] = "Subject name is required.";
     }
 
+    $errors = validateSubjectData($subject_data);
     // If there are no errors, store the subject in the session
     if (empty($errors)) {
         if (!isset($_SESSION['subjects'])) {
