@@ -144,23 +144,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_subject'])) {
                                 </tr>
                             </thead>
                             <tbody style="background-color: #d3d3d3; filter: brightness(110%);">
-                            <?php if (isset($_SESSION['subjects']) && !empty($_SESSION['subjects'])): ?>
-                                    <?php foreach ($_SESSION['subjects'] as $index => $subject): ?>
-                                        <tr>
+                                <?php if (empty($_SESSION['subjects'])): ?>
+                                    <tr>
+                                        <td colspan="3" class="text-center">No subjects available.</td>
+                                    </tr>
+                                <?php else: ?>
+                                    <?php foreach ($_SESSION['subjects'] as $subject): ?>
+                                        <tr style="border-bottom: 1px solid #000;">
                                             <td><?php echo htmlspecialchars($subject['subject_code']); ?></td>
                                             <td><?php echo htmlspecialchars($subject['subject_name']); ?></td>
                                             <td>
-                                                <!-- Add options such as edit or delete buttons -->
-                                                <form method="POST" action="" style="display: inline;">
-                                                    <input type="hidden" name="delete_index" value="<?php echo $index; ?>">
-                                                    <button type="submit" name="delete_subject" class="btn btn-danger btn-sm">Delete</button>
-                                                </form>
+                                                <a href="edit.php?code=<?php echo urlencode($subject['subject_code']); ?>" class="btn btn-sm btn-info">Edit</a>
+                                                <a href="delete.php?code=<?php echo urlencode($subject['subject_code']); ?>" class="btn btn-sm btn-danger">Delete</a>
                                             </td>
                                         </tr>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
+                                    <?php endforeach; ?>             
                                     <tr>
-                                        <td colspan="3" class="text-center">No subjects added yet.</td>
                                     </tr>
                                 <?php endif; ?>
 
