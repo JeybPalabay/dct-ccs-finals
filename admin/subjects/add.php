@@ -76,15 +76,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_subject'])) {
 <div class="container-fluid">
     <div class="row">
             <?php require_once '../partials/side-bar.php'; ?>
-      
-
-      
-
-        <!-- Main Content Column -->
         <div class="col-md-9 col-lg-10">
-            <!-- Main Content -->
             <div class="pt-5">
-                <h3 class="card-title">Add a New Subject</h3>
+                <h3 class="card-title">Add a New Subject</h3><br>
 
                 <div class="p-3 rounded border mb-3" style="background-color: #d3d3d3; filter: brightness(110%);">
                     <nav aria-label="breadcrumb">
