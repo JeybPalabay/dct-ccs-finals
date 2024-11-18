@@ -21,11 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (empty($student_id)) {
         $errors[] = "Student ID is required.";
     }
-
     if (empty($first_name)) {
         $errors[] = "First name is required.";
     }
-
     if (empty($last_name)) {
         $errors[] = "Last name is required.";
     }
@@ -151,8 +149,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <td><?php echo htmlspecialchars($student['first_name']); ?></td>
                                     <td><?php echo htmlspecialchars($student['last_name']); ?></td>
                                     <td>
-                                        <a href="edit.php?id=<?php echo urlencode($student['student_id']); ?>" class="btn btn-sm btn-info">Edit</a>
-                                        <a href="delete.php?id=<?php echo urlencode($student['student_id']); ?>" class="btn btn-sm btn-danger">Delete</a>
+                                        <a href="edit.php?id=<?php echo urlencode($student['id']); ?>" class="btn btn-sm btn-info">Edit</a>
+                                        <a href="delete.php?id=<?php echo urlencode($student['id']); ?>" class="btn btn-sm btn-danger">Delete</a>
                                         <a href="attach-subject.php?student_id=<?php echo urlencode($student['student_id']); ?>" class="btn btn-sm btn-warning">Attach Subject</a>
                                     </td>
                                 </tr>
@@ -175,4 +173,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 </div>
 
-<?php require_once '../partials/footer.php'; ?>
+<?php require_once '../partials/footer.php'; ?> 
