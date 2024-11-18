@@ -83,4 +83,42 @@ function guard() {
         exit;
     }
 }
+
+function validateSubjectData($subject_data) {
+    $errors = [];
+    
+    if (empty($subject_data['subject_code'])) {
+        $errors[] = "Subject Code is required";
+    }
+    
+    if (empty($subject_data['subject_name'])) {
+        $errors[] = "Subject Name is required";
+    }
+    
+    return $errors;
+}
+
+function checkDuplicateSubjectData($subject_data) {
+    if (!isset($_SESSION['subjects'])) {
+        $_SESSION['subjects'] = [];
+    }
+
+    $duplicateCode = array_filter($_SESSION['subjects'], function($subject) use ($subject_data) {
+        return $subject['subject_code'] === $subject_data['subject_code'];
+    });
+
+    if (!empty($duplicateCode)) {
+        return "Duplicate Subject Code";
+    }
+
+    $duplicateName = array_filter($_SESSION['subjects'], function($subject) use ($subject_data) {
+        return $subject['subject_name'] === $subject_data['subject_name'];
+    });
+
+    if (!empty($duplicateName)) {
+        return "Duplicate Subject Name";
+    }
+
+    return false; 
+}  
 ?>
