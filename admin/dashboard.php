@@ -13,6 +13,11 @@ $querySubjects = "SELECT COUNT(*) AS total_subjects FROM subjects";
 $resultSubjects = $connection->query($querySubjects);
 $subjectsCount = $resultSubjects->fetch_assoc()['total_subjects'];
 
+// Query to count the number of students
+$queryStudents = "SELECT COUNT(*) AS total_students FROM students";
+$resultStudents = $connection->query($queryStudents);
+$studentsCount = $resultStudents->fetch_assoc()['total_students'];
+
 // Close the database connection
 $connection->close();
 ?>
@@ -35,7 +40,7 @@ $connection->close();
             <div class="card border-primary mb-3">
                 <div class="card-header bg-primary text-white border-primary">Number of Students:</div>
                 <div class="card-body text-success">
-                    <h5 class="card-title">0</h5>
+                    <h5 class="card-title"><?php echo htmlspecialchars($studentsCount); ?></h5>
                 </div>
             </div>
         </div>
@@ -58,4 +63,4 @@ $connection->close();
             </div>
         </div>
     </div>    
-</main>
+</main>  
