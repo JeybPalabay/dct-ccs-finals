@@ -37,15 +37,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $errors = validateSubjectData($subject_data);
     // If there are no errors, store the subject in the session
     if (empty($errors)) {
-        if (!isset($_SESSION['subjects'])) {
-            $_SESSION['subjects'] = []; // Initialize the subjects array in the session if not set
+        // First, check for duplicates
+        $duplicateError = checkDuplicateSubjectData($subject_data);
+        if ($duplicateError) {
+            $errors[] = $duplicateError; // Add duplicate error to errors array
+        } else {
+            // No errors, add subject to session
+            $_SESSION['subjects'][] = [
+                'subject_code' => $subject_data['subject_code'],
+                'subject_name' => $subject_data['subject_name']
+            ];
+
+            // Clear the form fields after successful submission
+            $subject_data = []; // Reset form fields after successful submission
         }
-
-        // Add the subject to the session
-        $_SESSION['subjects'][] = $subject_data;
-
-        // Clear the form fields after successful submission
-        $subject_data = []; // Reset form fields after successful submission
     }
 }
 
