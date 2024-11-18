@@ -9,6 +9,7 @@ if (session_status() === PHP_SESSION_NONE) {
 guard(); // Ensure the user is logged in
 
 $errors = []; // Error messages array
+$success_message = ''; // Success message
 
 // Handle Add Subject Form Submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'add') {
@@ -42,7 +43,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
             $stmt = $conn->prepare("INSERT INTO subjects (subject_code, subject_name) VALUES (?, ?)");
             $stmt->bind_param("ss", $subject_code, $subject_name);
 
-            if (!$stmt->execute()) {
+            if ($stmt->execute()) {
+                // Set success message
+                $success_message = "Subject added successfully.";
+                // Redirect to the same page to reset the form
+                header("Location: " . $_SERVER['PHP_SELF']);
+                exit();
+            } else {
                 $errors[] = "Error adding subject. Please try again.";
             }
         }
@@ -69,6 +76,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                 </div>
             </div>
 
+            <!-- Display success message -->
+            <?php if (!empty($success_message)): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <?php echo htmlspecialchars($success_message); ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <?php endif; ?>
+
+            <!-- Display errors -->
             <?php if (!empty($errors)): ?>
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <strong>System Errors</strong>
@@ -88,11 +104,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                         <input type="hidden" name="action" value="add">
                         <div class="mb-3">
                             <label for="subject_code" class="form-label">Subject Code</label>
-                            <input type="text" class="form-control" id="subject_code" name="subject_code" maxlength="4" value="<?php echo isset($_POST['subject_code']) ? htmlspecialchars($_POST['subject_code']) : ''; ?>" placeholder="Enter Subject Code">
+                            <input type="text" class="form-control" id="subject_code" name="subject_code" maxlength="4" value="<?php echo isset($_POST['subject_code']) && !empty($errors) ? htmlspecialchars($_POST['subject_code']) : ''; ?>" placeholder="Enter Subject Code">
                         </div>
                         <div class="mb-3">
                             <label for="subject_name" class="form-label">Subject Name</label>
-                            <input type="text" class="form-control" id="subject_name" name="subject_name" value="<?php echo isset($_POST['subject_name']) ? htmlspecialchars($_POST['subject_name']) : ''; ?>" placeholder="Enter Subject Name">
+                            <input type="text" class="form-control" id="subject_name" name="subject_name" value="<?php echo isset($_POST['subject_name']) && !empty($errors) ? htmlspecialchars($_POST['subject_name']) : ''; ?>" placeholder="Enter Subject Name">
                         </div>
                         <button type="submit" class="btn btn-primary">Add Subject</button>
                     </form>
@@ -146,4 +162,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     </div>
 </div>
 
-<?php require_once '../partials/footer.php'; ?>
+<?php require_once '../partials/footer.php'; ?>  
