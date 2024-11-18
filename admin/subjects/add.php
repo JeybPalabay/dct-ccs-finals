@@ -1,6 +1,6 @@
 <?php
 require_once '../../functions.php';
-require_once '../partials/header.php'; 
+require_once '../partials/header.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -10,59 +10,41 @@ guard(); // Ensure the user is logged in
 
 $errors = []; // Error messages array
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Handle Add/Update Form Submission
-    if (isset($_POST['action']) && $_POST['action'] === 'add') {
-        $subject_code = trim($_POST['subject_code']);
-        $subject_name = trim($_POST['subject_name']);
+// Handle Add Subject Form Submission
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'add') {
+    $subject_code = trim($_POST['subject_code']);
+    $subject_name = trim($_POST['subject_name']);
 
-        // Validate input
-        if (empty($subject_code)) {
-            $errors[] = "Subject code is required.";
-        } elseif (strlen($subject_code) != 4) {
-            $errors[] = "Subject code must be exactly 4 characters.";
-        }
-
-        if (empty($subject_name)) {
-            $errors[] = "Subject name is required.";
-        }
-
-        if (empty($errors)) {
-            $conn = connectDatabase();
-
-            // Check for duplicate subject code or name
-            $stmt = $conn->prepare("SELECT * FROM subjects WHERE subject_code = ? OR subject_name = ?");
-            $stmt->bind_param("ss", $subject_code, $subject_name);
-            $stmt->execute();
-            $result = $stmt->get_result();
-
-            if ($result->num_rows > 0) {
-                $errors[] = "Subject code or name already exists.";
-            } else {
-                // Insert new subject
-                $stmt = $conn->prepare("INSERT INTO subjects (subject_code, subject_name) VALUES (?, ?)");
-                $stmt->bind_param("ss", $subject_code, $subject_name);
-
-                if (!$stmt->execute()) {
-                    $errors[] = "Error adding subject. Please try again.";
-                }
-            }
-
-            $stmt->close();
-            $conn->close();
-        }
+    // Validate input
+    if (empty($subject_code)) {
+        $errors[] = "Subject code is required.";
+    } elseif (strlen($subject_code) != 4) {
+        $errors[] = "Subject code must be exactly 4 characters.";
     }
 
-    // Handle Delete Action
-    if (isset($_POST['action']) && $_POST['action'] === 'delete') {
-        $subject_id = intval($_POST['subject_id']);
+    if (empty($subject_name)) {
+        $errors[] = "Subject name is required.";
+    }
 
+    if (empty($errors)) {
         $conn = connectDatabase();
-        $stmt = $conn->prepare("DELETE FROM subjects WHERE id = ?");
-        $stmt->bind_param("i", $subject_id);
 
-        if (!$stmt->execute()) {
-            $errors[] = "Error deleting subject. Please try again.";
+        // Check for duplicate subject code or name
+        $stmt = $conn->prepare("SELECT * FROM subjects WHERE subject_code = ? OR subject_name = ?");
+        $stmt->bind_param("ss", $subject_code, $subject_name);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $errors[] = "Subject code or name already exists.";
+        } else {
+            // Insert new subject
+            $stmt = $conn->prepare("INSERT INTO subjects (subject_code, subject_name) VALUES (?, ?)");
+            $stmt->bind_param("ss", $subject_code, $subject_name);
+
+            if (!$stmt->execute()) {
+                $errors[] = "Error adding subject. Please try again.";
+            }
         }
 
         $stmt->close();
@@ -70,7 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 ?>
-
 
 <div class="container-fluid">
     <div class="row">
@@ -99,7 +80,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <?php endif; ?>
-
 
             <!-- Subject Form -->
             <div class="card mb-4">
@@ -144,13 +124,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                         <td><?php echo htmlspecialchars($subject['subject_code']); ?></td>
                                         <td><?php echo htmlspecialchars($subject['subject_name']); ?></td>
                                         <td>
-                                            <form action="" method="POST" class="d-inline">
-                                                <input type="hidden" name="action" value="delete">
-                                                <input type="hidden" name="subject_id" value="<?php echo htmlspecialchars($subject['id']); ?>">
-                                                <a href="edit.php?id=<?php echo htmlspecialchars($subject['id']); ?>" class="btn btn-sm btn-info">Edit</a>
-
-                                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                            </form>
+                                            <a href="edit.php?id=<?php echo htmlspecialchars($subject['id']); ?>" class="btn btn-sm btn-info">Edit</a>
+                                            <a href="delete.php?id=<?php echo htmlspecialchars($subject['id']); ?>" class="btn btn-sm btn-danger">Delete</a>
                                         </td>
                                     </tr>
                                 <?php
