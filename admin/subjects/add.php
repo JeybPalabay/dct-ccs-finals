@@ -48,6 +48,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $subject_data = []; // Reset form fields after successful submission
     }
 }
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_subject'])) {
+    $delete_index = intval($_POST['delete_index']);
+
+    // Ensure the index is valid
+    if (isset($_SESSION['subjects'][$delete_index])) {
+        // Remove the subject from the session
+        unset($_SESSION['subjects'][$delete_index]);
+
+        // Re-index the array to maintain the correct sequence
+        $_SESSION['subjects'] = array_values($_SESSION['subjects']);
+
+        // Redirect to avoid form resubmission issues
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    }
+}
+
 ?>
 
 <div class="container-fluid">
@@ -121,7 +139,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 </tr>
                             </thead>
                             <tbody style="background-color: #d3d3d3; filter: brightness(110%);">
-                                <!-- Add subject list data rows here -->
+                            <?php if (isset($_SESSION['subjects']) && !empty($_SESSION['subjects'])): ?>
+                                    <?php foreach ($_SESSION['subjects'] as $index => $subject): ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($subject['subject_code']); ?></td>
+                                            <td><?php echo htmlspecialchars($subject['subject_name']); ?></td>
+                                            <td>
+                                                <!-- Add options such as edit or delete buttons -->
+                                                <form method="POST" action="" style="display: inline;">
+                                                    <input type="hidden" name="delete_index" value="<?php echo $index; ?>">
+                                                    <button type="submit" name="delete_subject" class="btn btn-danger btn-sm">Delete</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="3" class="text-center">No subjects added yet.</td>
+                                    </tr>
+                                <?php endif; ?>
+
                             </tbody>
                         </table>
                     </div>
