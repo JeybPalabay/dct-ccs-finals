@@ -30,14 +30,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (empty($errors)) {
             $conn = connectDatabase();
 
-            // Check for duplicate subject code
-            $stmt = $conn->prepare("SELECT * FROM subjects WHERE subject_code = ?");
-            $stmt->bind_param("s", $subject_code);
+            // Check for duplicate subject code or name
+            $stmt = $conn->prepare("SELECT * FROM subjects WHERE subject_code = ? OR subject_name = ?");
+            $stmt->bind_param("ss", $subject_code, $subject_name);
             $stmt->execute();
             $result = $stmt->get_result();
 
             if ($result->num_rows > 0) {
-                $errors[] = "Subject code already exists.";
+                $errors[] = "Subject code or name already exists.";
             } else {
                 // Insert new subject
                 $stmt = $conn->prepare("INSERT INTO subjects (subject_code, subject_name) VALUES (?, ?)");
@@ -71,6 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 ?>
 
+
 <div class="container-fluid">
     <div class="row">
         <?php require_once '../partials/side-bar.php'; ?>
@@ -88,15 +89,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
 
             <?php if (!empty($errors)): ?>
-                <div class="alert alert-danger">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <strong>System Errors</strong>
                     <ul>
                         <?php foreach ($errors as $error): ?>
                             <li><?php echo htmlspecialchars($error); ?></li>
                         <?php endforeach; ?>
                     </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <?php endif; ?>
+
 
             <!-- Subject Form -->
             <div class="card mb-4">
