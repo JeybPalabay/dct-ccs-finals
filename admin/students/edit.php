@@ -10,20 +10,26 @@ guard(); // Ensure the user is logged in
 
 $errors = []; // Error messages array
 $success_message = ''; // Success message
-
-// Initialize student data
 $student_data = ['student_id' => '', 'first_name' => '', 'last_name' => ''];
 
-// Fetch the student details for editing from session
+// Fetch the student details for editing
 if (isset($_GET['id'])) {
-    $student_id = intval($_GET['id']);
+    $student_id = intval($_GET['id']); // Make sure to use the primary key `id`
+    $conn = connectDatabase();
 
-    // Assuming `students` is stored in session for demonstration purposes
-    if (isset($_SESSION['students'][$student_id])) {
-        $student_data = $_SESSION['students'][$student_id];
+    $stmt = $conn->prepare("SELECT * FROM students WHERE id = ?"); // Ensure this matches your DB column
+    $stmt->bind_param("i", $student_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $student_data = $result->fetch_assoc();
     } else {
-        $errors[] = "Student not found in session data.";
+        $errors[] = "Student not found.";
     }
+
+    $stmt->close();
+    $conn->close();
 }
 
 // Handle the form submission
@@ -32,25 +38,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $first_name = trim($_POST['first_name']);
     $last_name = trim($_POST['last_name']);
 
-    // Server-side validation
+    // Validate input
     if (empty($first_name)) {
         $errors[] = "First name is required.";
-    } elseif (strlen($first_name) < 2 || strlen($first_name) > 50) {
-        $errors[] = "First name must be between 2 and 50 characters.";
     }
-
     if (empty($last_name)) {
         $errors[] = "Last name is required.";
-    } elseif (strlen($last_name) < 2 || strlen($last_name) > 50) {
-        $errors[] = "Last name must be between 2 and 50 characters.";
     }
 
-    // If no validation errors, update the student data in session
     if (empty($errors)) {
-        $_SESSION['students'][$student_id]['first_name'] = $first_name;
-        $_SESSION['students'][$student_id]['last_name'] = $last_name;
+        $conn = connectDatabase();
 
-        $success_message = "Student details updated successfully.";
+        // Proceed with the update without checking for identical data
+        $stmt = $conn->prepare("UPDATE students SET first_name = ?, last_name = ? WHERE id = ?");
+        $stmt->bind_param("ssi", $first_name, $last_name, $student_id);
+
+        if ($stmt->execute()) {
+            $success_message = "Student details updated successfully.";
+            header("Location: register.php");
+            exit();
+        } else {
+            $errors[] = "Error updating student. Please try again.";
+        }
+
+        $stmt->close();
+        $conn->close();
     }
 }
 ?>
@@ -78,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <!-- Display Errors -->
                 <?php if (!empty($errors)): ?>
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <strong>System Errors:</strong>
+                        <strong>System Errors</strong>
                         <ul>
                             <?php foreach ($errors as $error): ?>
                                 <li><?php echo htmlspecialchars($error); ?></li>
