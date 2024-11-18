@@ -4,6 +4,7 @@ require_once '../partials/header.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
+
 }
 
 guard(); // Ensure the user is logged in
