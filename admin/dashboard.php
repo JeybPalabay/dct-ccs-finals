@@ -18,6 +18,31 @@ $queryStudents = "SELECT COUNT(*) AS total_students FROM students";
 $resultStudents = $connection->query($queryStudents);
 $studentsCount = $resultStudents->fetch_assoc()['total_students'];
 
+// Query to count the number of passed and failed students (excluding students with no grades)
+$queryGrades = "
+    SELECT student_id, 
+           AVG(grade) AS average_grade
+    FROM students_subjects
+    WHERE grade > 0
+    GROUP BY student_id
+";
+
+$resultGrades = $connection->query($queryGrades);
+
+$passedCount = 0;
+$failedCount = 0;
+
+if ($resultGrades->num_rows > 0) {
+    while ($row = $resultGrades->fetch_assoc()) {
+        $averageGrade = $row['average_grade'];
+        if ($averageGrade >= 74.5) {
+            $passedCount++;
+        } else {
+            $failedCount++;
+        }
+    }
+}
+
 // Close the database connection
 $connection->close();
 ?>
@@ -49,7 +74,7 @@ $connection->close();
             <div class="card border-danger mb-3">
                 <div class="card-header bg-danger text-white border-danger">Number of Failed Students:</div>
                 <div class="card-body text-danger">
-                    <h5 class="card-title">0</h5>
+                    <h5 class="card-title"><?php echo htmlspecialchars($failedCount); ?></h5>
                 </div>
             </div>
         </div>
@@ -58,9 +83,11 @@ $connection->close();
             <div class="card border-success mb-3">
                 <div class="card-header bg-success text-white border-success">Number of Passed Students:</div>
                 <div class="card-body text-success">
-                    <h5 class="card-title">0</h5>
+                    <h5 class="card-title"><?php echo htmlspecialchars($passedCount); ?></h5>
                 </div>
             </div>
         </div>
     </div>    
-</main>  
+</main>    
+
+<?php require_once 'partials/footer.php'; ?>  
