@@ -30,27 +30,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     if (empty($errors)) {
         $conn = connectDatabase();
 
-        // Check for duplicate subject code or name
-        $stmt = $conn->prepare("SELECT * FROM subjects WHERE subject_code = ? OR subject_name = ?");
-        $stmt->bind_param("ss", $subject_code, $subject_name);
+        // Check for duplicate subject code
+        $stmt = $conn->prepare("SELECT * FROM subjects WHERE subject_code = ?");
+        $stmt->bind_param("s", $subject_code);
         $stmt->execute();
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
-            $errors[] = "Subject code or name already exists.";
+            $errors[] = "Subject code already exists.";
         } else {
-            // Insert new subject
-            $stmt = $conn->prepare("INSERT INTO subjects (subject_code, subject_name) VALUES (?, ?)");
-            $stmt->bind_param("ss", $subject_code, $subject_name);
+            // Check for duplicate subject name
+            $stmt = $conn->prepare("SELECT * FROM subjects WHERE subject_name = ?");
+            $stmt->bind_param("s", $subject_name);
+            $stmt->execute();
+            $result = $stmt->get_result();
 
-            if ($stmt->execute()) {
-                // Set success message
-                $success_message = "Subject added successfully.";
-                // Redirect to the same page to reset the form
-                header("Location: " . $_SERVER['PHP_SELF']);
-                exit();
+            if ($result->num_rows > 0) {
+                $errors[] = "Subject name already exists.";
             } else {
-                $errors[] = "Error adding subject. Please try again.";
+                // Insert new subject
+                $stmt = $conn->prepare("INSERT INTO subjects (subject_code, subject_name) VALUES (?, ?)");
+                $stmt->bind_param("ss", $subject_code, $subject_name);
+
+                if ($stmt->execute()) {
+                    // Set success message
+                    $success_message = "Subject added successfully.";
+                    // Redirect to the same page to reset the form
+                    header("Location: " . $_SERVER['PHP_SELF']);
+                    exit();
+                } else {
+                    $errors[] = "Error adding subject. Please try again.";
+                }
             }
         }
 
@@ -162,4 +172,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     </div>
 </div>
 
-<?php require_once '../partials/footer.php'; ?>  
+<?php require_once '../partials/footer.php'; ?>
