@@ -44,17 +44,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt->execute()) {
                 $success_message = "Subject added successfully.";
 
-                // Add the new subject to the session
-                if (!isset($_SESSION['subjects'])) {
-                    $_SESSION['subjects'] = [];
+                // Refresh the subject list in the session
+                $_SESSION['subjects'] = [];
+                $subjects_result = $conn->query("SELECT * FROM subjects");
+                while ($subject = $subjects_result->fetch_assoc()) {
+                    $_SESSION['subjects'][] = [
+                        'subject_code' => $subject['subject_code'],
+                        'subject_name' => $subject['subject_name']
+                    ];
                 }
-
-                // Adding new subject data to the session
-                $new_subject = [
-                    'subject_code' => $subject_code,
-                    'subject_name' => $subject_name
-                ];
-                $_SESSION['subjects'][] = $new_subject;
 
                 // Redirect to the same page to reset the form
                 header("Location: " . $_SERVER['PHP_SELF']);
@@ -172,4 +170,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </div>
 
-<?php require_once '../partials/footer.php'; ?>  
+<?php require_once '../partials/footer.php'; ?>
