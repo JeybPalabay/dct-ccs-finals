@@ -31,12 +31,12 @@ $currentDir = basename(dirname($_SERVER['PHP_SELF']));
                 </li>
                 <!-- Students Link -->
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-2 <?php echo $currentPage === 'register.php' ? 'active fw-bold' : ''; ?>" href="/admin/students/register.php">
+                    <a class="nav-link d-flex align-items-center gap-2 <?php echo $currentPage === 'register.php' || $currentDir === 'students' ? 'active fw-bold' : ''; ?>" href="/admin/students/register.php">
                         <i class="fa-solid fa-user fa-fw me-2"></i>
                         Students
                     </a>
-                </li>                
-            </ul>
+                </li>
+
            
             <hr class="my-3">
 
