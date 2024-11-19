@@ -1,29 +1,26 @@
 <?php
+// Assuming add-subject.php or similar script for adding a subject
 require_once '../../functions.php';
 require_once '../partials/header.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
-
 }
 
-guard(); // Ensure the user is logged in
+guard(); // Ensure user authentication
 
 $errors = []; // Error messages array
 $success_message = ''; // Success message
 
-// Handle Add Subject Form Submission
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'add') {
+// Handle the form submission for adding subjects
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $subject_code = trim($_POST['subject_code']);
     $subject_name = trim($_POST['subject_name']);
 
     // Validate input
     if (empty($subject_code)) {
         $errors[] = "Subject code is required.";
-    } elseif (strlen($subject_code) != 4) {
-        $errors[] = "Subject code must be exactly 4 characters.";
     }
-
     if (empty($subject_name)) {
         $errors[] = "Subject name is required.";
     }
@@ -31,22 +28,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     if (empty($errors)) {
         $conn = connectDatabase();
 
-        // Check for duplicate subject code or name
-        $stmt = $conn->prepare("SELECT * FROM subjects WHERE subject_code = ? OR subject_name = ?");
-        $stmt->bind_param("ss", $subject_code, $subject_name);
+        // Check for duplicate subject code
+        $stmt = $conn->prepare("SELECT * FROM subjects WHERE subject_code = ?");
+        $stmt->bind_param("s", $subject_code);
         $stmt->execute();
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
-            $errors[] = "Subject code or name already exists.";
+            $errors[] = "Subject code already exists.";
         } else {
-            // Insert new subject
+            // Insert new subject into the database
             $stmt = $conn->prepare("INSERT INTO subjects (subject_code, subject_name) VALUES (?, ?)");
             $stmt->bind_param("ss", $subject_code, $subject_name);
 
             if ($stmt->execute()) {
-                // Set success message
                 $success_message = "Subject added successfully.";
+
+                // Add the new subject to the session
+                if (!isset($_SESSION['subjects'])) {
+                    $_SESSION['subjects'] = [];
+                }
+
+                // Adding new subject data to the session
+                $new_subject = [
+                    'subject_code' => $subject_code,
+                    'subject_name' => $subject_name
+                ];
+                $_SESSION['subjects'][] = $new_subject;
+
                 // Redirect to the same page to reset the form
                 header("Location: " . $_SERVER['PHP_SELF']);
                 exit();
