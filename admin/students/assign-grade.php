@@ -24,7 +24,7 @@ $query = "SELECT students.student_id, students.first_name, students.last_name, s
           JOIN subjects ON students_subjects.subject_id = subjects.id
           WHERE students_subjects.student_id = ? AND students_subjects.subject_id = ?";
 $stmt = $connection->prepare($query);
-$stmt->bind_param("si", $student_id, $subject_id);
+$stmt->bind_param("ss", $student_id, $subject_id); // Corrected to bind as "ss"
 $stmt->execute();
 $result = $stmt->get_result();
 $studentSubjectData = $result->fetch_assoc();
@@ -48,17 +48,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Update the grade in the database
         $updateQuery = "UPDATE students_subjects SET grade = ? WHERE student_id = ? AND subject_id = ?";
         $updateStmt = $connection->prepare($updateQuery);
-        $updateStmt->bind_param("dsi", $grade, $student_id, $subject_id);
-
-        if ($updateStmt->execute()) {
-            $successMessage = "Grade assigned successfully!";
-            // Refresh data to reflect the updated grade
-            $studentSubjectData['grade'] = $grade;
+        
+        if ($updateStmt) {
+            $updateStmt->bind_param("dss", $grade, $student_id, $subject_id); // Use "dss" to match types
+            if ($updateStmt->execute()) {
+                $successMessage = "Grade assigned successfully!";
+                // Refresh data to reflect the updated grade
+                header("Location: attach-subject.php?student_id=" . urlencode($student_id));
+                exit;
+            } else {
+                $errors[] = "Failed to assign grade. Please try again.";
+            }
+            $updateStmt->close();
         } else {
-            $errors[] = "Failed to assign grade. Please try again.";
+            $errors[] = "Failed to prepare the update query.";
         }
-
-        $updateStmt->close();
     }
 }
 ?>
@@ -111,12 +115,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <li><strong>Subject Code:</strong> <?= htmlspecialchars($studentSubjectData['subject_code']); ?></li>
                         <li><strong>Subject Name:</strong> <?= htmlspecialchars($studentSubjectData['subject_name']); ?></li>
                     </ul>
+                    <hr>
 
-                    <!-- Grade Form -->
+                    <!-- Grade Form using Floating Label -->
                     <form method="POST" action="assign-grade.php?student_id=<?= urlencode($student_id); ?>&subject_id=<?= urlencode($subject_id); ?>">
-                        <div class="mb-3">
-                            <label for="grade" class="form-label">Grade</label>
-                            <input type="number" class="form-control" id="grade" name="grade" value="<?= htmlspecialchars($studentSubjectData['grade']); ?>" min="0" max="100" step="0.01">
+                        <div class="form-floating mb-3">
+                            <input type="number" class="form-control" id="grade" name="grade" value="<?= htmlspecialchars($studentSubjectData['grade']); ?>" min="0" max="100" step="0.01" placeholder="Grade">
+                            <label for="grade">Grade</label>
                         </div>
                         <a href="attach-subject.php?student_id=<?= urlencode($student_id); ?>" class="btn btn-secondary">Cancel</a>
                         <button type="submit" class="btn btn-primary">Assign Grade to Subject</button>
@@ -132,4 +137,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php
 // Close the database connection
 $connection->close();
-?>
+?>  

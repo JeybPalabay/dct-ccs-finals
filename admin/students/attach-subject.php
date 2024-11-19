@@ -186,7 +186,7 @@ $attachedSubjects = $stmt->get_result();
                                     <tr style="border-bottom: 1px solid #000;">
                                         <td><?= htmlspecialchars($subject['subject_code']); ?></td>
                                         <td><?= htmlspecialchars($subject['subject_name']); ?></td>
-                                        <td><?= htmlspecialchars('--.--'); ?></td>
+                                        <td><?= htmlspecialchars($subject['grade']); ?></td> <!-- Show actual grade -->
                                         <td>
                                             <a href="dettach-subject.php?student_id=<?= urlencode($student_id); ?>&subject_id=<?= urlencode($subject['subject_id']); ?>" class="btn btn-sm btn-danger">Detach Subject</a>
                                             <a href="assign-grade.php?student_id=<?= urlencode($student_id); ?>&subject_id=<?= urlencode($subject['subject_id']); ?>" class="btn btn-sm btn-success">Assign Grade</a>
@@ -207,4 +207,4 @@ $attachedSubjects = $stmt->get_result();
 <?php
 // Close the database connection
 $connection->close();
-?>
+?>  
