@@ -1,21 +1,49 @@
-<?php session_start();
+<?php
+session_start();
 require_once '../../functions.php';
 require_once '../partials/header.php';
 
-guard();
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+guard(); // Ensure the user is logged in
 
 $student_id = $_GET['student_id'] ?? null;
 if (!$student_id) {
+    echo "Student ID is missing or invalid."; // Debugging
     header("Location: register.php");
     exit;
+}
+echo "Student ID: " . htmlspecialchars($student_id) . "<br>"; // Debugging to verify value
+
+// Ensure 'students' session exists
+if (!isset($_SESSION['students'])) {
+    echo "No students found in session.<br>"; // Debugging
+    $_SESSION['students'] = [];
 }
 
+// Debugging: Print the entire students array from the session
+echo "<pre>Current Students in Session: ";
+var_dump($_SESSION['students']);
+echo "</pre>";
+
+// Retrieve the student data
 $studentIndex = getSelectedStudentIndex($student_id);
+if ($studentIndex === null) {
+    echo "No student found for ID: " . htmlspecialchars($student_id) . "<br>"; // Debugging
+    exit;
+}
 $studentData = getSelectedStudentData($studentIndex);
 if (!$studentData) {
+    echo "Student data could not be retrieved."; // Debugging
     header("Location: register.php");
     exit;
 }
+echo "<pre>Selected Student Data: ";
+var_dump($studentData);
+echo "</pre>";
+
 $errors = [];
 $successMessage = "";
 
@@ -27,7 +55,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $errors = validateAttachedSubject($selectedSubjects);
 
     if (empty($errors)) {
+        // Ensure 'attached_subjects' is always an array
         $studentData['attached_subjects'] = $studentData['attached_subjects'] ?? [];
+        
+        // Add selected subjects to the student's attached subjects
         foreach ($selectedSubjects as $subject_code) {
             if (!in_array($subject_code, $studentData['attached_subjects'])) {
                 $studentData['attached_subjects'][] = $subject_code;
@@ -90,8 +121,7 @@ $subjectsToAttach = array_filter($availableSubjects, function($subject) use ($at
             <?php if (!empty($subjectsToAttach)): ?>
                 <?php foreach ($subjectsToAttach as $subject): ?>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="subjects[]" value="<?= htmlspecialchars($subject['subject_code']); ?>"
-                            <?= isset($studentData['attached_subjects']) && in_array($subject['subject_code'], $studentData['attached_subjects']) ? 'checked' : ''; ?>>
+                        <input class="form-check-input" type="checkbox" name="subjects[]" value="<?= htmlspecialchars($subject['subject_code']); ?>">
                         <label class="form-check-label">
                             <?= htmlspecialchars($subject['subject_code'] . " - " . $subject['subject_name']); ?>
                         </label>
@@ -104,7 +134,6 @@ $subjectsToAttach = array_filter($availableSubjects, function($subject) use ($at
         </form>
     </div>
 </div>
-
 
 <div class="card mt-5">
     <div class="card-body">
@@ -144,6 +173,5 @@ $subjectsToAttach = array_filter($availableSubjects, function($subject) use ($at
     </div>
 </div>
 
+<?php require_once '../partials/footer.php'; ?>
 
-<?php require_once 
-'../footer.php'; ?>

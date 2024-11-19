@@ -136,4 +136,19 @@ function getSelectedStudentData($index) {
 function validateAttachedSubject($subject_data) {
     return $subject_data ? [] : ["At least one subject should be selected"];
 }
+
+function getSelectedSubjectIndex($subject_code) {
+    foreach ($_SESSION['subjects'] as $index => $subject) {
+        if ($subject['subject_code'] === $subject_code) {
+            return $index;
+        }
+    }
+    return null;
+}
+function getSelectedSubjectData($index) {
+    if (isset($_SESSION['subjects'][$index])) {
+        return $_SESSION['subjects'][$index];
+    }
+    return null;
+}
 ?>
