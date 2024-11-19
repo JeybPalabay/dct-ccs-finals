@@ -24,7 +24,7 @@ $query = "SELECT students.student_id, students.first_name, students.last_name, s
           JOIN subjects ON students_subjects.subject_id = subjects.id
           WHERE students_subjects.student_id = ? AND students_subjects.subject_id = ?";
 $stmt = $connection->prepare($query);
-$stmt->bind_param("ss", $student_id, $subject_id); // Corrected to bind as "ss"
+$stmt->bind_param("ss", $student_id, $subject_id); 
 $stmt->execute();
 $result = $stmt->get_result();
 $studentSubjectData = $result->fetch_assoc();
@@ -41,16 +41,16 @@ $successMessage = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $grade = $_POST['grade'] ?? null;
 
-    // Validate the grade
-    if (is_null($grade) || !is_numeric($grade) || $grade < 0 || $grade > 100) {
-        $errors[] = "Please enter a valid grade between 0 and 100.";
+    // Server-side validation for the grade to be between 65 and 100
+    if (is_null($grade) || !is_numeric($grade) || $grade < 65 || $grade > 100) {
+        $errors[] = "Please enter a valid grade between 65 and 100.";
     } else {
         // Update the grade in the database
         $updateQuery = "UPDATE students_subjects SET grade = ? WHERE student_id = ? AND subject_id = ?";
         $updateStmt = $connection->prepare($updateQuery);
         
         if ($updateStmt) {
-            $updateStmt->bind_param("dss", $grade, $student_id, $subject_id); // Use "dss" to match types
+            $updateStmt->bind_param("dss", $grade, $student_id, $subject_id); 
             if ($updateStmt->execute()) {
                 $successMessage = "Grade assigned successfully!";
                 // Refresh data to reflect the updated grade
@@ -117,11 +117,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </ul>
                     <hr>
 
-                    <!-- Grade Form using Floating Label -->
+                    <!-- Grade Form -->
                     <form method="POST" action="assign-grade.php?student_id=<?= urlencode($student_id); ?>&subject_id=<?= urlencode($subject_id); ?>">
                         <div class="form-floating mb-3">
-                            <input type="number" class="form-control" id="grade" name="grade" value="<?= htmlspecialchars($studentSubjectData['grade']); ?>" min="0" max="100" step="0.01" placeholder="Grade">
-                            <label for="grade">Grade</label>
+                            <!-- Removed browser-based validation by removing `min` and `max` attributes -->
+                            <input type="number" class="form-control" id="grade" name="grade" value="<?= htmlspecialchars($studentSubjectData['grade']); ?>" step="0.01" placeholder="Grade">
+                            <label for="grade">Grade (65-100)</label>
                         </div>
                         <a href="attach-subject.php?student_id=<?= urlencode($student_id); ?>" class="btn btn-secondary">Cancel</a>
                         <button type="submit" class="btn btn-primary">Assign Grade to Subject</button>
@@ -137,4 +138,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php
 // Close the database connection
 $connection->close();
-?>  
+?>
