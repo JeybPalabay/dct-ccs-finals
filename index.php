@@ -84,4 +84,5 @@ $errors = [];
 
 </html>
 
-<?php include 'footer.php'; ?>
+<?php include 'admin/partials/footer.php';
+?>
