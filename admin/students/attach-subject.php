@@ -33,40 +33,43 @@ $successMessage = "";
 
 // Handle the form submission for attaching subjects
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $selectedSubjects = $_POST['subjects'] ?? [];
+    if (isset($_POST['subjects'])) {
+        $selectedSubjects = $_POST['subjects'] ?? [];
 
-    if (empty($selectedSubjects)) {
-        $errors[] = "Please select at least one subject to attach.";
-    } else {
-        // Attach the selected subjects to the student
-        foreach ($selectedSubjects as $subject_id) {
-            // Check if the subject is already attached to the student
-            $checkQuery = "SELECT * FROM students_subjects WHERE student_id = ? AND subject_id = ?";
-            $checkStmt = $connection->prepare($checkQuery);
-            $checkStmt->bind_param("si", $student_id, $subject_id);
-            $checkStmt->execute();
-            $checkResult = $checkStmt->get_result();
+        if (empty($selectedSubjects)) {
+            $errors[] = "Please select at least one subject to attach.";
+        } else {
+            // Attach the selected subjects to the student
+            foreach ($selectedSubjects as $subject_id) {
+                // Check if the subject is already attached to the student
+                $checkQuery = "SELECT * FROM students_subjects WHERE student_id = ? AND subject_id = ?";
+                $checkStmt = $connection->prepare($checkQuery);
+                $checkStmt->bind_param("si", $student_id, $subject_id);
+                $checkStmt->execute();
+                $checkResult = $checkStmt->get_result();
 
-            if ($checkResult->num_rows === 0) {
-                // Insert new subject if it's not already attached
-                $insertQuery = "INSERT INTO students_subjects (student_id, subject_id) VALUES (?, ?)";
-                $insertStmt = $connection->prepare($insertQuery);
-                if ($insertStmt) {
-                    $insertStmt->bind_param("si", $student_id, $subject_id);
-                    if ($insertStmt->execute()) {
-                        $successMessage = "Subjects successfully attached to the student!";
+                if ($checkResult->num_rows === 0) {
+                    // Insert new subject if it's not already attached
+                    $insertQuery = "INSERT INTO students_subjects (student_id, subject_id, grade) VALUES (?, ?, ?)";
+                    $insertStmt = $connection->prepare($insertQuery);
+                    if ($insertStmt) {
+                        $defaultGrade = 0; // Set default grade value
+                        $insertStmt->bind_param("sii", $student_id, $subject_id, $defaultGrade);
+                        if ($insertStmt->execute()) {
+                            $successMessage = "Subjects successfully attached to the student!";
+                        } else {
+                            $errors[] = "Failed to attach subject ID: " . htmlspecialchars($subject_id);
+                        }
                     } else {
-                        $errors[] = "Failed to attach subject ID: " . htmlspecialchars($subject_id);
+                        $errors[] = "Failed to prepare the query for subject ID: " . htmlspecialchars($subject_id);
                     }
-                } else {
-                    $errors[] = "Failed to prepare the query for subject ID: " . htmlspecialchars($subject_id);
                 }
             }
-        }
 
-        // Refresh the page to display the updated information
-        header("Location: attach-subject.php?student_id=" . urlencode($student_id));
-        exit;
+            // Refresh the page to display the updated information
+            header("Location: attach-subject.php?student_id=" . urlencode($student_id));
+            exit;
+        }
     }
 }
 
@@ -78,7 +81,7 @@ $stmt->execute();
 $availableSubjects = $stmt->get_result();
 
 // Retrieve the list of attached subjects
-$query = "SELECT subjects.subject_code, subjects.subject_name, students_subjects.subject_id FROM subjects 
+$query = "SELECT subjects.subject_code, subjects.subject_name, students_subjects.subject_id, students_subjects.grade FROM subjects 
           JOIN students_subjects ON subjects.id = students_subjects.subject_id 
           WHERE students_subjects.student_id = ?";
 $stmt = $connection->prepare($query);
@@ -169,21 +172,24 @@ $attachedSubjects = $stmt->get_result();
                             <tr>
                                 <th>Subject Code</th>
                                 <th>Subject Name</th>
+                                <th>Grade</th>
                                 <th>Option</th>
                             </tr>
                         </thead>
                         <tbody style="background-color: #d3d3d3; filter: brightness(110%);">
                             <?php if ($attachedSubjects->num_rows == 0): ?>
                                 <tr>
-                                    <td colspan="3" class="text-center">No subjects attached yet.</td>
+                                    <td colspan="4" class="text-center">No subjects attached yet.</td>
                                 </tr>
                             <?php else: ?>
                                 <?php while ($subject = $attachedSubjects->fetch_assoc()): ?>
                                     <tr style="border-bottom: 1px solid #000;">
                                         <td><?= htmlspecialchars($subject['subject_code']); ?></td>
                                         <td><?= htmlspecialchars($subject['subject_name']); ?></td>
+                                        <td><?= htmlspecialchars('--.--'); ?></td>
                                         <td>
-                                            <a href="dettach-subject.php?student_id=<?= urlencode($student_id); ?>&subject_id=<?= urlencode($subject['subject_id']); ?>" class="btn btn-sm btn-danger">Detach</a>
+                                            <a href="dettach-subject.php?student_id=<?= urlencode($student_id); ?>&subject_id=<?= urlencode($subject['subject_id']); ?>" class="btn btn-sm btn-danger">Detach Subject</a>
+                                            <a href="assign-grade.php?student_id=<?= urlencode($student_id); ?>&subject_id=<?= urlencode($subject['subject_id']); ?>" class="btn btn-sm btn-success">Assign Grade</a>
                                         </td>
                                     </tr>
                                 <?php endwhile; ?>
