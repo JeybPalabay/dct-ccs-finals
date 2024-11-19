@@ -40,12 +40,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($result->num_rows > 0) {
             $errors[] = "Student ID already exists.";
         } else {
-            // Insert new student
+            // Insert new student into the database
             $stmt = $conn->prepare("INSERT INTO students (student_id, first_name, last_name) VALUES (?, ?, ?)");
             $stmt->bind_param("sss", $student_id, $first_name, $last_name);
 
             if ($stmt->execute()) {
                 $success_message = "Student added successfully.";
+
+                // Add the new student to the session
+                if (!isset($_SESSION['students'])) {
+                    $_SESSION['students'] = [];
+                }
+
+                // Adding new student data to the session
+                $new_student = [
+                    'student_id' => $student_id,
+                    'first_name' => $first_name,
+                    'last_name' => $last_name,
+                    'attached_subjects' => [] // Initialize with no attached subjects
+                ];
+                $_SESSION['students'][] = $new_student;
+
                 // Redirect to the same page to reset the form
                 header("Location: " . $_SERVER['PHP_SELF']);
                 exit();
@@ -60,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 ?>
 
+<!-- HTML for registration form (unchanged) -->
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar -->
@@ -151,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <td>
                                         <a href="edit.php?id=<?php echo urlencode($student['id']); ?>" class="btn btn-sm btn-info">Edit</a>
                                         <a href="delete.php?id=<?php echo urlencode($student['id']); ?>" class="btn btn-sm btn-danger">Delete</a>
-                                        <a href="attach-subject.php?student_id=<?php echo urlencode($student['student_id']); ?>" class="btn btn-sm btn-warning">Attach Subject</a>
+                                        <a href="attach-subject.php?student_id=<?= urlencode($student['student_id']); ?>" class="btn btn-sm btn-warning">Attach Subject</a>
                                     </td>
                                 </tr>
                             <?php
@@ -173,4 +189,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 </div>
 
-<?php require_once '../partials/footer.php'; ?> 
+<?php require_once '../partials/footer.php'; ?>

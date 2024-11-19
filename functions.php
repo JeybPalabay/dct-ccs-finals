@@ -79,10 +79,11 @@ function renderErrorsToView(string $error): string {
 
 function guard() {
     if (!isset($_SESSION['email']) || empty($_SESSION['email'])) {
-        header("Location: index.php");
-        exit;
+        header("Location: /DCT-CCS-FINALS/index.php"); // Corrected path to redirect to the root level index.php
+        exit();
     }
 }
+
 
 function validateSubjectData($subject_data) {
     $errors = [];
@@ -121,4 +122,16 @@ function checkDuplicateSubjectData($subject_data) {
 
     return false; 
 }  
+
+function getSelectedStudentIndex($student_id) {
+    $indices = array_keys(array_column($_SESSION['students'], 'student_id'), $student_id);
+    // Return the first index found (or null if not found)
+    return $indices ? $indices[0] : null;
+}
+
+// Get the student data based on the index
+function getSelectedStudentData($index) {
+    return $_SESSION['students'][$index] ?? null;
+}
+
 ?>
