@@ -1,6 +1,9 @@
 <?php    
 session_start();
 
+define('BASE_URL', 'http://dct-ccs-finals.test/');
+
+
 function connectDatabase() {
     $host = "localhost"; // Database server (usually localhost for local dev)
     $username = "root";  // Your MySQL username
@@ -79,11 +82,10 @@ function renderErrorsToView(string $error): string {
 
 function guard() {
     if (!isset($_SESSION['email']) || empty($_SESSION['email'])) {
-        header("Location: /DCT-CCS-FINALS/index.php"); // Corrected path to redirect to the root level index.php
+        header("Location: " . BASE_URL . "index.php");
         exit();
     }
 }
-
 
 function validateSubjectData($subject_data) {
     $errors = [];

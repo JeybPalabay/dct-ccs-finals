@@ -1,9 +1,10 @@
 <?php
-require_once 'partials/header.php';
 require_once '../functions.php';
-require_once 'partials/side-bar.php';
 
-guard(); // Ensure the user is authenticated
+guard(); // Make sure the user is logged in before sending any output
+
+require_once 'partials/header.php';
+require_once 'partials/side-bar.php';
 
 // Connect to the database and fetch counts
 $connection = connectDatabase();
@@ -23,7 +24,7 @@ $queryGrades = "
     SELECT student_id, 
            AVG(grade) AS average_grade
     FROM students_subjects
-    WHERE grade > 0
+    WHERE grade IS NOT NULL AND grade > 0
     GROUP BY student_id
 ";
 
