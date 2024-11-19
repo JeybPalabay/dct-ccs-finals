@@ -79,10 +79,11 @@ function renderErrorsToView(string $error): string {
 
 function guard() {
     if (!isset($_SESSION['email']) || empty($_SESSION['email'])) {
-        header("Location: index.php");
-        exit;
+        header("Location: /DCT-CCS-FINALS/index.php"); // Corrected path to redirect to the root level index.php
+        exit();
     }
 }
+
 
 function validateSubjectData($subject_data) {
     $errors = [];
@@ -132,23 +133,5 @@ function getSelectedStudentIndex($student_id) {
 function getSelectedStudentData($index) {
     return $_SESSION['students'][$index] ?? null;
 }
-// Validate attached subject data
-function validateAttachedSubject($subject_data) {
-    return $subject_data ? [] : ["At least one subject should be selected"];
-}
 
-function getSelectedSubjectIndex($subject_code) {
-    foreach ($_SESSION['subjects'] as $index => $subject) {
-        if ($subject['subject_code'] === $subject_code) {
-            return $index;
-        }
-    }
-    return null;
-}
-function getSelectedSubjectData($index) {
-    if (isset($_SESSION['subjects'][$index])) {
-        return $_SESSION['subjects'][$index];
-    }
-    return null;
-}
 ?>
