@@ -121,4 +121,19 @@ function checkDuplicateSubjectData($subject_data) {
 
     return false; 
 }  
+
+function getSelectedStudentIndex($student_id) {
+    $indices = array_keys(array_column($_SESSION['students'], 'student_id'), $student_id);
+    // Return the first index found (or null if not found)
+    return $indices ? $indices[0] : null;
+}
+
+// Get the student data based on the index
+function getSelectedStudentData($index) {
+    return $_SESSION['students'][$index] ?? null;
+}
+// Validate attached subject data
+function validateAttachedSubject($subject_data) {
+    return $subject_data ? [] : ["At least one subject should be selected"];
+}
 ?>
