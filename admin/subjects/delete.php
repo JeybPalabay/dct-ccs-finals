@@ -1,5 +1,6 @@
 <?php
 ob_start(); // Start output buffering at the very beginning
+$pageTitle = "Delete Subjects";
 
 require_once __DIR__ . '/../../functions.php'; // Load utility functions
 require_once __DIR__ . '/../partials/header.php'; // Load header
