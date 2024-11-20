@@ -1,4 +1,5 @@
 <?php
+$pageTitle = "Assign Grades from Students";
 require_once '../../functions.php';
 require_once '../partials/header.php';
 

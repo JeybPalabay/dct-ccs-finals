@@ -1,4 +1,5 @@
 <?php
+$pageTitle = "Dashboard";
 require_once '../functions.php';
 
 guard(); // Make sure the user is logged in before sending any output

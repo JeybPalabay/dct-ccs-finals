@@ -1,4 +1,5 @@
 <?php
+$pageTitle = "Edit Subjects";
 require_once '../../functions.php';
 require_once '../partials/header.php';
 

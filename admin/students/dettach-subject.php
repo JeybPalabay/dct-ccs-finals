@@ -1,4 +1,5 @@
 <?php
+$pageTitle = "Dettach Subjects from Students";
 require_once '../../functions.php';
 require_once '../partials/header.php';
 
